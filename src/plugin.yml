@@ -1,0 +1,28 @@
+name: CMod
+version: 1.0
+description: Cuboid Plugin von Niklas Schütrumpf
+
+author: Gurkengewuerz
+website: http://gurkengewuerz.de/u/DerTwix
+
+main: de.gurkengewuerz.cmod.CMod
+
+commands:
+  cmod:
+     description: cmod Command Info
+     usage: /cmod <command>
+  cdel:
+      description: cmod del Command
+      usage: /cdel
+  cfill:
+      description: cmod fill Command
+      usage: /cfill
+  cwalls:
+      description: cmod walls Command
+      usage: /cwalls
+  protect:
+      description: cmod create Command
+      usage: /protect
+  highprotect:
+      description: cmod highprotect Command
+      usage: /highprotect
