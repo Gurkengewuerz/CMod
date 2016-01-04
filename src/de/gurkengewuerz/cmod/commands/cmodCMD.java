@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
@@ -341,34 +342,80 @@ public class cmodCMD implements CommandExecutor {
                                 return true;
                             }
                             if (args.length == 2) {
-                                MaterialData fillMatData = parseMatData(args[1], ":");
-                                if (fillMatData == null) {
-                                    try {
-                                        Material mats = Material.getMaterial(args[1].toUpperCase());
-                                        fillMatData = new MaterialData(mats);
-                                    } catch (Exception e) {
-                                        p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[1] + ChatColor.RED + ", Format: <id>[:data]");
-                                        return true;
-                                    }
+                                MaterialData finalMatData = parseMatData(args[1], ":");
+                                if (finalMatData == null) {
+                                    p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[1] + ChatColor.RED + ", Format: <MaterialName>[:data]");
+                                    return true;
                                 }
-                                int count = 0;
+                                ArrayList<Block> blocklist = new ArrayList<>();
                                 int minX = setting.getBorder1().getBlockX();
                                 int minY = setting.getBorder1().getBlockY();
                                 int minZ = setting.getBorder1().getBlockZ();
                                 int maxX = setting.getBorder2().getBlockX();
                                 int maxY = setting.getBorder2().getBlockY();
                                 int maxZ = setting.getBorder2().getBlockZ();
+                                World w = setting.getBorder1().getWorld();
                                 for (int x = minX; x <= maxX; x++) {
                                     for (int z = minZ; z <= maxZ; z++) {
                                         for (int y = minY; y <= maxY; y++) {
-                                            count++;
-                                            setting.getBorder2().getWorld().getBlockAt(x, y, z).setTypeIdAndData(fillMatData.getItemTypeId(), fillMatData.getData(), false);
+                                            blocklist.add(w.getBlockAt(x, y, z));
                                         }
                                     }
                                 }
-                                p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + count + ChatColor.AQUA + " Blöcke wurden ersetzt");
+                                blocklist.stream().forEach(b -> {
+                                    b.setType(finalMatData.getItemType());
+                                    b.setData(finalMatData.getData());
+                                });
+                                p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + blocklist.size() + ChatColor.AQUA + " Blöcke wurden ersetzt");
                             } else {
                                 p.sendMessage(Variables.cmodprefix + ChatColor.RED + "/cmod fill <Material:Data>");
+                            }
+                            break;
+
+                        case "replace":
+                            if (setting.getBorder1() == null || setting.getBorder2() == null) {
+                                p.sendMessage(Variables.cmodprefix + ChatColor.RED + "Setzte voher deine Punkte");
+                                return true;
+                            }
+                            if (args.length == 3) {
+                                MaterialData finalMatData = parseMatData(args[2], ":");
+                                if (finalMatData == null) {
+                                    p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[2] + ChatColor.RED + ", Format: <MaterialName>[:data]");
+                                    return true;
+                                }
+                                MaterialData oldMatData = parseMatData(args[1], ":");
+                                if (oldMatData == null) {
+                                    p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[1] + ChatColor.RED + ", Format: <MaterialName>[:data]");
+                                    return true;
+                                }
+                                ArrayList<Block> blocklist = new ArrayList<>();
+                                int minX = setting.getBorder1().getBlockX();
+                                int minY = setting.getBorder1().getBlockY();
+                                int minZ = setting.getBorder1().getBlockZ();
+                                int maxX = setting.getBorder2().getBlockX();
+                                int maxY = setting.getBorder2().getBlockY();
+                                int maxZ = setting.getBorder2().getBlockZ();
+                                World w = setting.getBorder1().getWorld();
+                                for (int x = minX; x <= maxX; x++) {
+                                    for (int z = minZ; z <= maxZ; z++) {
+                                        for (int y = minY; y <= maxY; y++) {
+                                            blocklist.add(w.getBlockAt(x, y, z));
+                                        }
+                                    }
+                                }
+                                final int[] count = {0};
+                                blocklist.stream().forEach(b -> {
+                                    if (b.getType().equals(oldMatData.getItemType())) {
+                                        //if (b.getData() == oldMatData.getData()) {
+                                            count[0]++;
+                                            b.setType(finalMatData.getItemType());
+                                            b.setData(finalMatData.getData());
+                                        //}
+                                    }
+                                });
+                                p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + count[0] + ChatColor.AQUA + " Blöcke wurden ersetzt");
+                            } else {
+                                p.sendMessage(Variables.cmodprefix + ChatColor.RED + "/cmod replace <Material:Data> <Material:Data>");
                             }
                             break;
 
@@ -380,42 +427,41 @@ public class cmodCMD implements CommandExecutor {
                             if (args.length == 2) {
                                 MaterialData fillMatData = parseMatData(args[1], ":");
                                 if (fillMatData == null) {
-                                    try {
-                                        Material mats = Material.getMaterial(args[1].toUpperCase());
-                                        fillMatData = new MaterialData(mats);
-                                    } catch (Exception e) {
-                                        p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[1] + ChatColor.RED + ", Format: <id>[:data]");
-                                        return true;
-                                    }
+                                    p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[1] + ChatColor.RED + ", Format: <MaterialName>[:data]");
+                                    return true;
                                 }
-                                int count = 0;
                                 int minX = setting.getBorder1().getBlockX();
                                 int minY = setting.getBorder1().getBlockY();
                                 int minZ = setting.getBorder1().getBlockZ();
                                 int maxX = setting.getBorder2().getBlockX();
                                 int maxY = setting.getBorder2().getBlockY();
                                 int maxZ = setting.getBorder2().getBlockZ();
-                                int zLenth = (maxZ - minZ) + 1;
-                                int xLenth = (maxX - minX) + 1;
-                                int currZ = 1;
-                                int currX = 1;
+                                World w = setting.getBorder1().getWorld();
+
+                                ArrayList<Block> blocklist = new ArrayList<>();
+
                                 for (int x = minX; x <= maxX; x++) {
-                                    currZ = 1;
-                                    currX++;
-                                    for (int z = minZ; z <= maxZ; z++) {
-                                        for (int y = minY; y <= maxY; y++) {
-                                            if (currX != 1 && currX != xLenth) {
-                                                if (currZ != 1 && currZ != zLenth) {
-                                                    continue;
-                                                }
-                                            }
-                                            count++;
-                                            setting.getBorder2().getWorld().getBlockAt(x, y, z).setTypeIdAndData(fillMatData.getItemTypeId(), fillMatData.getData(), false);
-                                            currZ++;
-                                        }
+                                    for (int y = minY; y <= maxY; y++) {
+                                        blocklist.add(w.getBlockAt(x, y, minZ));
+                                        blocklist.add(w.getBlockAt(x, y, maxZ));
                                     }
                                 }
-                                p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + count + ChatColor.AQUA + " Blöcke wurden ersetzt");
+
+                                for (int z = minZ; z <= maxZ; z++) {
+                                    for (int y = minY; y <= maxY; y++) {
+                                        blocklist.add(w.getBlockAt(minX, y, z));
+                                        blocklist.add(w.getBlockAt(maxX, y, z));
+                                    }
+                                }
+
+                                final MaterialData finalMatData = fillMatData;
+
+                                blocklist.stream().forEach(b -> {
+                                    b.setType(finalMatData.getItemType());
+                                    b.setData(finalMatData.getData());
+                                });
+
+                                p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + blocklist.size() + ChatColor.AQUA + " Blöcke wurden ersetzt");
                             } else {
                                 p.sendMessage(Variables.cmodprefix + ChatColor.RED + "/cmod walls <Material:Data>");
                             }
@@ -426,73 +472,27 @@ public class cmodCMD implements CommandExecutor {
                                 p.sendMessage(Variables.cmodprefix + ChatColor.RED + "Setzte voher deine Punkte");
                                 return true;
                             }
-                            if (args.length >= 1) {
-                                MaterialData fillMatData = new MaterialData(Material.AIR);
-                                int count = 0;
-                                int minX = setting.getBorder1().getBlockX();
-                                int minY = setting.getBorder1().getBlockY();
-                                int minZ = setting.getBorder1().getBlockZ();
-                                int maxX = setting.getBorder2().getBlockX();
-                                int maxY = setting.getBorder2().getBlockY();
-                                int maxZ = setting.getBorder2().getBlockZ();
-                                for (int x = minX; x <= maxX; x++) {
-                                    for (int z = minZ; z <= maxZ; z++) {
-                                        for (int y = minY; y <= maxY; y++) {
-                                            count++;
-                                            setting.getBorder2().getWorld().getBlockAt(x, y, z).setTypeIdAndData(fillMatData.getItemTypeId(), fillMatData.getData(), false);
-                                        }
+                            MaterialData finalMatData = new MaterialData(Material.AIR);
+                            ArrayList<Block> blocklist = new ArrayList<>();
+                            int minX = setting.getBorder1().getBlockX();
+                            int minY = setting.getBorder1().getBlockY();
+                            int minZ = setting.getBorder1().getBlockZ();
+                            int maxX = setting.getBorder2().getBlockX();
+                            int maxY = setting.getBorder2().getBlockY();
+                            int maxZ = setting.getBorder2().getBlockZ();
+                            World w = setting.getBorder1().getWorld();
+                            for (int x = minX; x <= maxX; x++) {
+                                for (int z = minZ; z <= maxZ; z++) {
+                                    for (int y = minY; y <= maxY; y++) {
+                                        blocklist.add(w.getBlockAt(x, y, z));
                                     }
                                 }
-                                p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + count + ChatColor.AQUA + " Blöcke wurden entfernt");
-                            } else {
-                                p.sendMessage(Variables.cmodprefix + ChatColor.RED + "/cmod del");
                             }
-                            break;
-
-                        case "replace":
-                            Settings setting2 = Settings.getSett(p);
-                            if (setting2.getBorder1() == null || setting2.getBorder2() == null) {
-                                p.sendMessage(Variables.cmodprefix + ChatColor.RED + "Setzte voher deine Punkte");
-                                return true;
-                            }
-                            if (args.length == 3) {
-                                MaterialData fromMatData = parseMatData(args[1], ":");
-                                if (fromMatData == null) {
-                                    p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[1] + ChatColor.RED + ", Format: <id>[:data]");
-                                    return true;
-                                }
-
-                                MaterialData replaceData = parseMatData(args[2], ":");
-                                if (replaceData == null) {
-                                    p.sendMessage(ChatColor.RED + "Falsche Eingabe: " + ChatColor.DARK_PURPLE + args[1] + ChatColor.RED + ", Format: <id>[:data]");
-                                    return true;
-                                }
-                                int count = 0;
-                                int count2 = 0;
-                                int minX = setting2.getBorder1().getBlockX();
-                                int minY = setting2.getBorder1().getBlockY();
-                                int minZ = setting2.getBorder1().getBlockZ();
-                                int maxX = setting2.getBorder2().getBlockX();
-                                int maxY = setting2.getBorder2().getBlockY();
-                                int maxZ = setting2.getBorder2().getBlockZ();
-                                for (int x = minX; x <= maxX; x++) {
-                                    for (int z = minZ; z <= maxZ; z++) {
-                                        for (int y = minY; y <= maxY; y++) {
-                                            count++;
-                                            Block b = setting2.getBorder2().getWorld().getBlockAt(x, y, z);
-                                            if (b.getType() == fromMatData.getItemType()) {
-                                                if ((fromMatData.getData() == -1) || (b.getData() == fromMatData.getData())) {
-                                                    count2++;
-                                                    b.setTypeIdAndData(replaceData.getItemTypeId(), replaceData.getData(), false);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + count2 + ChatColor.AQUA + " von " + ChatColor.WHITE + count + ChatColor.AQUA + " Blöcke wurden ersetzt");
-                            } else {
-                                p.sendMessage(Variables.cmodprefix + ChatColor.RED + "/cmod replace <VonMaterial:Data> <ZuMaterial:Data>");
-                            }
+                            blocklist.stream().forEach(b -> {
+                                b.setType(finalMatData.getItemType());
+                                b.setData(finalMatData.getData());
+                            });
+                            p.sendMessage(Variables.cmodprefix + ChatColor.WHITE + blocklist.size() + ChatColor.AQUA + " Blöcke wurden ersetzt");
                             break;
 
                         case "order":
@@ -614,26 +614,29 @@ public class cmodCMD implements CommandExecutor {
         return true;
     }
 
-    public static MaterialData parseMatData(String idData, String delimiter) {
-        if ((idData == null) || (idData.isEmpty())) {
+    public static MaterialData parseMatData(String materialName, String delimiter) {
+        materialName = materialName.toUpperCase();
+        if ((materialName == null) || (materialName.isEmpty())) {
             return null;
         }
-        idData = idData.trim();
+        materialName = materialName.trim();
         MaterialData result;
         try {
-            if (idData.contains(delimiter)) {
-                Iterator<String> itr = Splitter.on(delimiter).split(idData).iterator();
-                result = new MaterialData(Integer.parseInt((String) itr.next()), Byte.parseByte((String) itr.next()));
+            if (materialName.contains(delimiter)) {
+                Iterator<String> itr = Splitter.on(delimiter).split(materialName).iterator();
+                if (Material.getMaterial((String) itr.next()) != null) {
+                    result = new MaterialData(Material.getMaterial((String) itr.next()), Byte.parseByte((String) itr.next()));
+                } else {
+                    return null;
+                }
             } else {
-                result = new MaterialData(Integer.parseInt(idData), (byte) -1);
+                if (Material.getMaterial(materialName) != null) {
+                    result = new MaterialData(Material.getMaterial(materialName), (byte) -1);
+                } else {
+                    return null;
+                }
             }
         } catch (NumberFormatException ex) {
-            return null;
-        }
-        if ((result.getItemTypeId() < 0) || (Material.getMaterial(result.getItemTypeId()) == null)) {
-            return null;
-        }
-        if (result.getData() < -1) {
             return null;
         }
         return result;
