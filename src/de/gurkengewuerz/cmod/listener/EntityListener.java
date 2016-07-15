@@ -24,9 +24,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
-import org.bukkit.event.painting.PaintingBreakByEntityEvent;
-import org.bukkit.event.painting.PaintingBreakEvent;
-import org.bukkit.event.painting.PaintingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 /**
@@ -106,33 +103,6 @@ public class EntityListener implements Listener {
                 e.setCancelled(true);
             }
 
-        }
-    }
-
-    @EventHandler
-    public void onPaintingBreak(PaintingBreakEvent e) {
-        Painting painting = e.getPainting();
-        if ((e.getCause() == PaintingBreakEvent.RemoveCause.ENTITY) && (((PaintingBreakByEntityEvent) e).getRemover().getType() == EntityType.PLAYER)) {
-            Zone zone = ZoneManager.getZone(painting.getLocation());
-            if (zone != null) {
-                Player p = (Player) ((PaintingBreakByEntityEvent) e).getRemover();
-                if (!ZoneManager.checkPermission(zone, p, Flags.PROTECTION)) {
-                    e.setCancelled(true);
-                    p.sendMessage(Variables.STRING_PROTECTED);
-                }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onPaintingPlace(PaintingPlaceEvent e) {
-        Player p = e.getPlayer();
-        Painting painting = e.getPainting();
-
-        Zone zone = ZoneManager.getZone(painting.getLocation());
-        if ((zone != null) && (!ZoneManager.checkPermission(zone, p, Flags.PROTECTION))) {
-            e.setCancelled(true);
-            p.sendMessage(Variables.STRING_PROTECTED);
         }
     }
 
